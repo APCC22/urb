@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="text/javascript" src="Embalses.js"></script>
+
+    <style> 
+     body { 
+     padding: 0; 
+     margin: 0; 
+    } 
+    html, body, #map { 
+    height: 100%; 
+    } 
+
+
+    #map { 
+  width: 100%;
+  height: 100%;
+  box-shadow: 5px 5px 5px #888;
+  }
+  .info {
+ padding: 6px 8px; 
+ font: 14px/16px Arial, Helvetica, sans-serif; 
+ background: white; 
+ background: rgba(255,255,255,0.8); 
+ box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+ border-radius: 5px; 
+}
+.info h2 {
+ 
+margin: 0 0 5px; 
+ color: #777; 
+}
+
+
+    </style> 
+
+</head>
+ 
+<body> 
+ 
+    <div id = 'map'> </div> 
+
+<script>
+
+    var OSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>contributors', 
+    maxZoom: 18 
+ 
+}); 
+    
+
+var limites = L.tileLayer.wms("http://localhost:8080/geoserver/wms", {
+    layers: 'limites_demarcacion',
+    format: 'image/png',
+    transparent: true,
+    tiled: true,
+    attribution: "Duero"
+});
+
+var rio = L.tileLayer.wms("http://localhost:8080/geoserver/wms", {
+    layers: 'segmentos_rio',
+    format: 'image/png',
+    transparent: true,
+    tiled: true,
+    attribution: "Duero"
+});
+
+
+var eStyle = {
+    'color':"#3E77B6"};
+
+
+    var map = L.map('map', { 
+ //scrollWheelZoom: false, 
+  center: [41.73, -4.973], 
+  zoom: 13, 
+  layers: [OSM, limites, rio] 
+  }); 
+  
+
+//Insertando un titulo en el mapa
+
+var title = L.control();
+ title.onAdd = function (map) { 
+    var div = L.DomUtil.create('div', 'info');
+            div.innerHTML +=
+            '<h2>Hidrografía del Duero</h2>Proyecto final';
+         return div;
+};
+ 
+title.addTo(map);
+
+
+var geo = L.geoJson(embalses,{style:eStyle}).addTo(map);
+
+
+//Popup
+var baseMaps = {
+    "OpenStreetMap": OSM
+};
+
+var overlayMaps = {
+    "Demarcacion": limites,
+    "Rios": rio,
+    "Embalses": geo,
+};
+
+L.control.scale({metric:true, imperial:false}).addTo(map); 
+
+L.control.layers(baseMaps, overlayMaps,  {collapsed:false}).addTo(map);
+
+
+
+// Insertando una leyenda en el mapa
+ 
+var legend = L.control({position: 'bottomright'});
+ 
+legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend');
+ 
+            div.innerHTML +=
+            '<img src="http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=duerogroup" alt="legend" width="101" height="60">';
+ 
+        return div;
+
+};
+ 
+legend.addTo(map); 
+  
+
+
+
+
+
+
+
+
+
+
+
+        </script>
+    </body>
+ </html>
+ 
+ 
